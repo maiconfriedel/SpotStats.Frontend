@@ -3,6 +3,7 @@ import axios from "axios";
 import { Buffer } from "buffer";
 import querystring from "query-string";
 import { useNavigate } from "react-router-dom";
+import { client_id, client_secret } from "../../config/spotify";
 
 import useQuery from "../../utils/useQuery";
 
@@ -11,8 +12,6 @@ const Callback = () => {
   const navigate = useNavigate();
 
   const redirect_uri = "http://localhost:3000/callback";
-  const client_id = "";
-  const client_secret = "";
 
   useEffect(() => {
     async function getToken() {
