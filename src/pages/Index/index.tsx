@@ -2,11 +2,15 @@ import React, { useEffect, useState } from "react";
 import querystring from "query-string";
 import axios from "axios";
 import { client_id } from "../../config/spotify";
+import { prominent } from "color.js";
+import { BsFillPlayCircleFill, BsPauseCircleFill } from "react-icons/bs";
 
 import "./index.css";
+import { invertColor } from "../../utils/invertColor";
 const Index = () => {
   const [token, setToken] = useState<string | null>(null);
   const [topTracks, setTopTracks] = useState([]);
+  const [topTrackColors, setTopTrackColors] = useState<any[]>([]);
 
   const [audio, setAudio] = useState<HTMLAudioElement | undefined>(undefined);
   const [audioState, setAudioState] = useState(false);
@@ -15,11 +19,26 @@ const Index = () => {
   useEffect(() => {
     const tokenJson = window.localStorage.getItem("spAuth");
 
-    if (tokenJson !== null) {
+    if (tokenJson !== null && tokenJson !== "") {
       const token = JSON.parse(tokenJson);
       setToken(token.access_token);
     }
   }, []);
+
+  useEffect(() => {
+    topTracks.forEach((topTrack: any) => {
+      prominent(topTrack.album.images[0].url, {
+        amount: 1,
+        format: "hex",
+      }).then((a) => {
+        console.log(a);
+        setTopTrackColors((topTrackColor) => [
+          ...topTrackColor,
+          { id: topTrack.id, color: a.toString() },
+        ]);
+      });
+    });
+  }, [topTracks]);
 
   function generateRandomString(length: number) {
     var result = "";
@@ -49,6 +68,11 @@ const Index = () => {
       });
   }
 
+  function logout() {
+    setToken("");
+    window.localStorage.setItem("spAuth", "");
+  }
+
   async function getTopTracks(timeRange: string) {
     const response = await axios.get(
       `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}`,
@@ -59,8 +83,6 @@ const Index = () => {
         },
       }
     );
-
-    console.log(response.data.items);
 
     setTopTracks(response.data.items);
   }
@@ -108,6 +130,8 @@ const Index = () => {
           <button onClick={() => getTopTracks("long_term")}>
             Top Tracks (All Time)
           </button>
+
+          <button onClick={() => logout()}>Logout</button>
           <br />
           <br />
 
@@ -117,23 +141,59 @@ const Index = () => {
                 <div
                   className="trackContainer"
                   style={{
-                    backgroundColor: "#333",
+                    backgroundColor: topTrackColors.find(
+                      (a) => a.id === topTrack.id
+                    )?.color,
+                    color: invertColor(
+                      topTrackColors.find((a) => a.id === topTrack.id)?.color,
+                      true
+                    ),
                   }}
                   key={topTrack.id}
                 >
-                  <button
-                    disabled={playingId !== "" && playingId !== topTrack.id}
-                    className="playButton"
-                    onClick={() => {
-                      audioState
-                        ? stopPreview()
-                        : playPreview(topTrack.preview_url, topTrack.id);
-                    }}
-                  >
-                    {playingId !== "" && playingId === topTrack.id && audioState
-                      ? "Pause Preview"
-                      : "Play Preview"}
-                  </button>
+                  {playingId !== "" &&
+                  playingId === topTrack.id &&
+                  audioState ? (
+                    <button
+                      className="playIcon"
+                      onClick={() => {
+                        stopPreview();
+                      }}
+                    >
+                      <BsPauseCircleFill
+                        size={40}
+                        color={invertColor(
+                          topTrackColors.find((a) => a.id === topTrack.id)
+                            ?.color,
+                          true
+                        )}
+                        style={{ cursor: "pointer" }}
+                      />
+                    </button>
+                  ) : (
+                    <button
+                      className="playIcon"
+                      disabled={playingId !== "" && playingId !== topTrack.id}
+                      onClick={() => {
+                        playPreview(topTrack.preview_url, topTrack.id);
+                      }}
+                    >
+                      <BsFillPlayCircleFill
+                        size={40}
+                        color={
+                          playingId !== "" && playingId !== topTrack.id
+                            ? "#999"
+                            : invertColor(
+                                topTrackColors.find((a) => a.id === topTrack.id)
+                                  ?.color,
+                                true
+                              )
+                        }
+                        style={{ cursor: "pointer" }}
+                      />
+                    </button>
+                  )}
+
                   <div>
                     {index + 1}
                     {". "}
@@ -150,7 +210,8 @@ const Index = () => {
                   <img
                     src={topTrack.album.images[0].url}
                     alt="album-img"
-                    height={70}
+                    height={100}
+                    className="albumCover"
                   />
                 </div>
               );

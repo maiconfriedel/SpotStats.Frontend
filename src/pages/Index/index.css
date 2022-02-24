@@ -1,5 +1,5 @@
 .container {
-  background-color: #222;
+  background-color: #039e56;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -11,15 +11,29 @@
 .trackContainer {
   font-size: 20px;
   width: 1000px;
-  height: 70px;
+  height: 100px;
   margin-top: 5px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   display: flex;
   flex: 1;
   justify-content: space-between;
   align-items: center;
+  border-radius: 10px 20px 20px 10px;
 }
 
-.playButton {
-  margin-left: 15px;
+.playIcon {
+  margin-left: 10px;
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+}
+
+.albumCover {
+  border-radius: 0 10px 10px 0;
+  position: relative;
+  right: -1px;
 }

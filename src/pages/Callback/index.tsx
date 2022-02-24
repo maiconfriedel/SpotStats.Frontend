@@ -26,7 +26,7 @@ const Callback = () => {
           headers: {
             Authorization:
               "Basic " +
-              new Buffer(client_id + ":" + client_secret).toString("base64"),
+              Buffer.from(client_id + ":" + client_secret).toString("base64"),
             "Content-Type": "application/x-www-form-urlencoded",
           },
         }
