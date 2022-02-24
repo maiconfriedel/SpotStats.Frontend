@@ -1,5 +1,28 @@
+.login {
+  margin: 0;
+  border: 0px;
+  padding: 20px;
+  color: #fff;
+  background-color: #222;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  width: 90%;
+}
+
+.login:hover {
+  background-color: #333;
+}
+
+.spotifyIcon {
+  margin-right: 15px;
+}
+
 .container {
-  background-color: #039e56;
+  background-color: #018c4c;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -8,9 +31,76 @@
   color: white;
 }
 
+.buttonsContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin: 45px 0 30px 0px;
+  width: 100%;
+}
+
+.topSongsButton {
+  margin: 5px;
+  border: 0px;
+  padding: 20px;
+  color: #fff;
+  background-color: #222;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  width: 330px;
+}
+
+.topSongsButton:hover {
+  background-color: #333;
+}
+
+.selected {
+  background-color: #555;
+}
+
+.logout {
+  margin: 0;
+  border: 0px;
+  padding: 10px 20px 10px 20px;
+  color: #fff;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  /* border-radius: 5px; */
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.logout:hover {
+  background-color: #c0392b;
+}
+
+.logoutIcon {
+  margin-left: 5px;
+}
+
+.songsContainer {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 50px;
+}
+
 .trackContainer {
   font-size: 20px;
-  width: 1000px;
+  width: 90%;
   height: 100px;
   margin-top: 5px;
   margin-bottom: 5px;
@@ -21,8 +111,16 @@
   border-radius: 10px 20px 20px 10px;
 }
 
+@media only screen and (max-width: 900px) {
+  .trackContainer {
+    font-size: 16px;
+    width: 95%;
+  }
+}
+
 .playIcon {
   margin-left: 10px;
+  margin-right: 10px;
   background: none;
   color: inherit;
   border: none;

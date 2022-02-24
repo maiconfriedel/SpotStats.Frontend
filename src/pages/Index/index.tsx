@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from "react";
 import querystring from "query-string";
 import axios from "axios";
-import { client_id } from "../../config/spotify";
 import { prominent } from "color.js";
-import { BsFillPlayCircleFill, BsPauseCircleFill } from "react-icons/bs";
+import {
+  BsFillPlayCircleFill,
+  BsPauseCircleFill,
+  BsSpotify,
+} from "react-icons/bs";
+import { IoMdLogOut } from "react-icons/io";
+import { toast } from "react-toastify";
+
+import { invertColor } from "../../utils/invertColor";
 
 import "./index.css";
-import { invertColor } from "../../utils/invertColor";
 const Index = () => {
   const [token, setToken] = useState<string | null>(null);
   const [topTracks, setTopTracks] = useState([]);
   const [topTrackColors, setTopTrackColors] = useState<any[]>([]);
+  const [range, setRange] = useState("");
 
   const [audio, setAudio] = useState<HTMLAudioElement | undefined>(undefined);
   const [audioState, setAudioState] = useState(false);
@@ -52,8 +59,6 @@ const Index = () => {
   }
 
   function loginWithSpotify() {
-    const redirect_uri = "http://localhost:3000/callback";
-
     const state = generateRandomString(16);
     const scope = "user-top-read user-read-recently-played user-read-private";
 
@@ -61,9 +66,9 @@ const Index = () => {
       "https://accounts.spotify.com/authorize?" +
       querystring.stringify({
         response_type: "code",
-        client_id: client_id,
+        client_id: process.env.REACT_APP_SPOTIFY_CLIENT_ID,
         scope: scope,
-        redirect_uri: redirect_uri,
+        redirect_uri: process.env.REACT_APP_CALLBACK_URL,
         state: state,
       });
   }
@@ -74,17 +79,36 @@ const Index = () => {
   }
 
   async function getTopTracks(timeRange: string) {
-    const response = await axios.get(
-      `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}}`,
-        },
-      }
-    );
+    setRange(timeRange);
 
-    setTopTracks(response.data.items);
+    try {
+      const response = await axios.get(
+        `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}}`,
+          },
+        }
+      );
+
+      setTopTracks(response.data.items);
+    } catch {
+      toast.error(
+        "An error ocurred loading songs. Please login again with Spotify",
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
+      logout();
+    }
   }
 
   useEffect(() => {
@@ -114,26 +138,45 @@ const Index = () => {
 
   return (
     <div className="container">
-      {!token && <button onClick={loginWithSpotify}>Login with Spotify</button>}
+      {!token && (
+        <button className="login" onClick={() => loginWithSpotify()}>
+          <BsSpotify size={30} color="#fff" className="spotifyIcon" />
+          Login with Spotify
+        </button>
+      )}
       {token && (
-        <div>
-          <br />
-          <br />
-          <button onClick={() => getTopTracks("short_term")}>
-            Top Tracks (last 4 weeks)
+        <div className="songsContainer">
+          <button className="logout" onClick={() => logout()}>
+            Logout <IoMdLogOut size={25} color="#fff" className="logoutIcon" />
           </button>
+          <div className="buttonsContainer">
+            <button
+              className={`topSongsButton ${
+                range === "short_term" ? "selected" : ""
+              }`}
+              onClick={() => getTopTracks("short_term")}
+            >
+              Top Tracks (last 4 weeks)
+            </button>
 
-          <button onClick={() => getTopTracks("medium_term")}>
-            Top Tracks (last 6 months)
-          </button>
+            <button
+              className={`topSongsButton ${
+                range === "medium_term" ? "selected" : ""
+              }`}
+              onClick={() => getTopTracks("medium_term")}
+            >
+              Top Tracks (last 6 months)
+            </button>
 
-          <button onClick={() => getTopTracks("long_term")}>
-            Top Tracks (All Time)
-          </button>
-
-          <button onClick={() => logout()}>Logout</button>
-          <br />
-          <br />
+            <button
+              className={`topSongsButton ${
+                range === "long_term" ? "selected" : ""
+              }`}
+              onClick={() => getTopTracks("long_term")}
+            >
+              Top Tracks (All Time)
+            </button>
+          </div>
 
           {topTracks &&
             topTracks.map((topTrack: any, index: number) => {
@@ -172,6 +215,7 @@ const Index = () => {
                     </button>
                   ) : (
                     <button
+                      title="Play preview"
                       className="playIcon"
                       disabled={playingId !== "" && playingId !== topTrack.id}
                       onClick={() => {
@@ -202,7 +246,12 @@ const Index = () => {
                     {topTrack.artists.map((artist: any, index: number) => {
                       return (
                         <React.Fragment key={index}>
-                          {artist.name}{" "}
+                          {artist.name}
+                          {topTrack.artists.length > 1
+                            ? index + 1 === topTrack.artists.length
+                              ? ""
+                              : ", "
+                            : ""}
                         </React.Fragment>
                       );
                     })}
